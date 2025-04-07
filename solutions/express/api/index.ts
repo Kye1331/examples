@@ -2,12 +2,16 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+import path from "path";
+
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
 const genAI = new GoogleGenerativeAI(process.env.GENAI_API_KEY || "");
+
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Function to ask Gemini a question
 async function AskGemini(prompt: string): Promise<string> {
