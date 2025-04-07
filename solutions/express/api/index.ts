@@ -1,112 +1,53 @@
-require('dotenv').config();
-
 const express = require('express');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const dotenv = require('dotenv');
+const fs = require('fs');
+
+dotenv.config();  // Load environment variables
+const apiKey = process.env.GENAI_API_KEY;
+const ai = new GoogleGenerativeAI({ apiKey });
+
 const app = express();
-const { sql } = require('@vercel/postgres');
+app.use(express.json()); // Middleware to parse JSON request body
 
-const bodyParser = require('body-parser');
-const path = require('path');
+async function AskGemini(prompt) {
+  const response = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
+    contents: prompt,
+  });
+  return response.text;
+}
 
-// Create application/x-www-form-urlencoded parser
-const urlencodedParser = bodyParser.urlencoded({ extended: false });
+// Route to handle the /ask endpoint
+app.post('/ask', async (req, res) => {
+  const prompt = req.body.question;  // Get the question from the request body
+  if (!prompt) {
+    return res.status(400).json({ error: 'Question is required' });
+  }
 
-app.use(express.static('public'));
-
-app.get('/', function (req, res) {
-	res.sendFile(path.join(__dirname, '..', 'components', 'home.htm'));
+  try {
+    const answer = await AskGemini(prompt);
+    res.json({
+      question: prompt,
+      answer: answer
+    });
+  } catch (error) {
+    console.error("Error generating response:", error);
+    res.status(500).json({ error: 'Failed to generate response' });
+  }
 });
 
-app.get('/about', function (req, res) {
-	res.sendFile(path.join(__dirname, '..', 'components', 'about.htm'));
+// Read file content (optional, just to show file reading functionality)
+fs.readFile('prompts/mytextfile.txt', 'utf-8', (err, data) => {
+  if (err) {
+    console.error("An error occurred:", err);
+    return;
+  }
+  console.log(data);
 });
 
-app.get('/uploadUser', function (req, res) {
-	res.sendFile(path.join(__dirname, '..', 'components', 'user_upload_form.htm'));
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
-
-app.post('/uploadSuccessful', urlencodedParser, async (req, res) => {
-	try {
-		await sql`INSERT INTO Users (Id, Name, Email) VALUES (${req.body.user_id}, ${req.body.name}, ${req.body.email});`;
-		res.status(200).send('<h1>User added successfully</h1>');
-	} catch (error) {
-		console.error(error);
-		res.status(500).send('Error adding user');
-	}
-});
-
-app.get('/allUsers', async (req, res) => {
-	try {
-		const users = await sql`SELECT * FROM Users;`;
-		if (users && users.rows.length > 0) {
-			let tableContent = users.rows
-				.map(
-					(user) =>
-						`<tr>
-                        <td>${user.id}</td>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                    </tr>`
-				)
-				.join('');
-
-			res.status(200).send(`
-                <html>
-                    <head>
-                        <title>Users</title>
-                        <style>
-                            body {
-                                font-family: Arial, sans-serif;
-                            }
-                            table {
-                                width: 100%;
-                                border-collapse: collapse;
-                                margin-bottom: 15px;
-                            }
-                            th, td {
-                                border: 1px solid #ddd;
-                                padding: 8px;
-                                text-align: left;
-                            }
-                            th {
-                                background-color: #f2f2f2;
-                            }
-                            a {
-                                text-decoration: none;
-                                color: #0a16f7;
-                                margin: 15px;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <h1>Users</h1>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>User ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${tableContent}
-                            </tbody>
-                        </table>
-                        <div>
-                            <a href="/">Home</a>
-                            <a href="/uploadUser">Add User</a>
-                        </div>
-                    </body>
-                </html>
-            `);
-		} else {
-			res.status(404).send('Users not found');
-		}
-	} catch (error) {
-		console.error(error);
-		res.status(500).send('Error retrieving users');
-	}
-});
-
-app.listen(3000, () => console.log('Server ready on port 3000.'));
-
-module.exports = app;
