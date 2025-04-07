@@ -5,22 +5,29 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Load environment variables from .env file
 dotenv.config();
 
-// Initialize GoogleGenerativeAI client
+// Check if the API key is set in the environment variables
 const apiKey = process.env.GENAI_API_KEY;
 if (!apiKey) {
   throw new Error("API key is missing in environment variables");
 }
 
+// Initialize the GoogleGenerativeAI client
 const ai = new GoogleGenerativeAI({ apiKey });
 
 // Function to ask Gemini AI and get the response
 async function AskGemini(prompt: string): Promise<string> {
   try {
+    // Log to verify the initialization of the AI object
+    console.log("Google Generative AI initialized:", ai);
+
     // Make API request to the Gemini model
     const response = await ai.models.generateContent({
       model: "gemini-2.0-flash",  // Replace with the actual model you're using
       contents: prompt,
     });
+
+    // Log the response from the AI
+    console.log("AI Response:", response);
 
     // Check if the response contains valid text
     if (response && response.text) {
