@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "target": "ES2020",
+      "module": "CommonJS",
+      "lib": ["ES2020"],
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "strict": true,
+      "resolveJsonModule": true,
+      "skipLibCheck": true,
+      "typeRoots": ["./node_modules/@types", "./src/types"]
+    },
+    "include": ["api", "src/types"]
+  }
+  

@@ -1,71 +1,51 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import dotenv from 'dotenv';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import express, { Request, Response } from "express";
+import dotenv from "dotenv";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Load environment variables from .env file
 dotenv.config();
 
-// Check if the API key is set in the environment variables
-const apiKey = process.env.GENAI_API_KEY;
-if (!apiKey) {
-  throw new Error("API key is missing in environment variables");
-}
+const app = express();
+app.use(express.json());
 
-// Initialize the GoogleGenerativeAI client
-const ai = new GoogleGenerativeAI({ apiKey });
+const genAI = new GoogleGenerativeAI(process.env.GENAI_API_KEY || "");
 
-// Function to ask Gemini AI and get the response
+// Function to ask Gemini a question
 async function AskGemini(prompt: string): Promise<string> {
   try {
-    // Log to verify the initialization of the AI object
-    console.log("Google Generative AI initialized:", ai);
-
-    // Make API request to the Gemini model
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",  // Replace with the actual model you're using
-      contents: prompt,
-    });
-
-    // Log the response from the AI
-    console.log("AI Response:", response);
-
-    // Check if the response contains valid text
-    if (response && response.text) {
-      return response.text;
-    } else {
-      throw new Error('No response text returned from AI model');
-    }
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const result = await model.generateContent(prompt);
+    // Ensuring response is awaited properly
+    const response = await result.response;
+    return await response.text();  // Awaiting text() to properly return the string
   } catch (error) {
     console.error("Error generating response:", error);
     throw new Error("Failed to generate response");
   }
 }
 
-// Export the serverless function handler for Vercel
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === 'POST') {
-    const prompt = req.body.question;
+// POST /ask route
+app.post("/ask", async (req: Request, res: Response) => {
+  const { question } = req.body;
 
-    // Check if the question is provided
-    if (!prompt || prompt.trim() === "") {
-      return res.status(400).json({ error: "Question is required" });
-    }
-
-    try {
-      // Call the AskGemini function to get the response from the AI
-      const answer = await AskGemini(prompt);
-
-      // Return the response as a JSON object
-      res.status(200).json({
-        question: prompt,
-        answer: answer,
-      });
-    } catch (error) {
-      console.error("Error handling /ask request:", error);
-      res.status(500).json({ error: "Failed to generate response" });
-    }
-  } else {
-    // If method is not POST, return a method not allowed error
-    res.status(405).json({ error: 'Method Not Allowed' });
+  if (!question) {
+    return res.status(400).json({ error: "Question is required" });
   }
+
+  try {
+    const answer = await AskGemini(question);
+    res.json({ question, answer });
+  } catch (error) {
+    console.error(error); // Log the error for debugging
+    res.status(500).json({ error: "Failed to generate response" });
+  }
+});
+
+// Start server locally (optional for dev only)
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
 }
+
+export default app;
