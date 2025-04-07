@@ -12,7 +12,7 @@ const genAI = new GoogleGenerativeAI(process.env.GENAI_API_KEY || "");
 // Function to ask Gemini a question
 async function AskGemini(prompt: string): Promise<string> {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text();
