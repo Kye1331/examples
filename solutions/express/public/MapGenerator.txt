@@ -1,1 +1,88 @@
-What is the capital of germany?
+Generate a detailed 100x100 tile-based fantasy game map using the tile codes below. Each tile represents a game environment feature and should be used strategically to create a realistic, explorable world. The map should be playable and designed for player movement, exploration, and gameplay variety.
+
+Tile Codes (Environment Key):
+
+yaml
+
+00 : nothing (not on map / out-of-bounds)
+01 : ground (normal terrain)
+02 : rock (small boulders)
+03 : high rock / cliff (impassable boundary)
+04 : wall (castle/building wall)
+05 : wall boundary (castle/city limits)
+06 : water (lake, river)
+07 : snowy ground
+08 : snowy wall boundary (impassable)
+09 : snowy rock
+10 : door
+11 : tree
+12 : tall tree
+13 : bed
+14 : sand
+15 : desert rock
+16 : bridge
+17 : wooden floor
+18 : grass (lush, walkable)
+19 : flower patch
+20 : lava
+21 : lava rock
+22 : cave entrance
+23 : campfire
+24 : tent
+25 : farm field (crop)
+26 : fence
+27 : stone path
+28 : market stall
+29 : fountain
+30 : throne
+🧠 Map Logic Guidelines:
+Design functional zones: Include distinct areas like:
+
+Forest biome (use 11, 12, 18, 19)
+
+Snow biome (use 07, 08, 09)
+
+Desert biome (use 14, 15, 20, 21)
+
+Castle/City (use 04, 05, 10, 13, 17, 30)
+
+Plains (01, 18, 27)
+
+Lake or river system (06 with bridges 16)
+
+Village/town (use 17, 28, 29, 25, 26)
+
+Cave or dungeon entrances (22, surrounded by 02, 03)
+
+Biome transitions should be gradual, using border tiles or mix-ins (e.g., 18 into 07, or 14 into 01).
+
+Avoid square shapes in natural zones (e.g., forests, lakes) to simulate realism. Only man-made structures (e.g., castles, towns) should be rectangular or organized.
+
+The map should include paths (27) connecting areas like:
+
+Forest → Village → Castle
+
+Castle → Dungeon → Snow area
+
+Town → Desert → River
+
+Include gameplay-relevant structures:
+
+A central castle or fortress
+
+A small forest camp with tent (24) and campfire (23)
+
+At least one village or town square with stalls (28), fountain (29), and housing
+
+A farming area (25, 26)
+
+Optional secret cave with lava pool entrance (22, 20)
+
+Start the map output immediately.
+
+Only output the tile map in plain text, one row per line.
+
+Do not explain the map.
+
+Do not wrap it in code blocks or Markdown.
+

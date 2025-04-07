@@ -13,18 +13,6 @@ const genAI = new GoogleGenerativeAI(process.env.GENAI_API_KEY || "");
 
 app.use(express.static(path.join(__dirname, "../public")));
 
-// Function to ask Gemini a question
-async function AskGemini(prompt: string): Promise<string> {
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  } catch (error) {
-    console.error("Error generating response:", error);
-    throw new Error("Failed to generate response");
-  }
-}
 
 // Accept question via query string (GET /ask?question=...)
 app.get("/ask", async (req: Request, res: Response) => {
@@ -35,26 +23,20 @@ app.get("/ask", async (req: Request, res: Response) => {
   }
 
   try {
-    const answer = await AskGemini(question);
-    res.json({ question, answer });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" }); // Or gemini-pro if supported
+    const stream = await model.generateContentStream(question);
+
+    res.setHeader("Content-Type", "text/plain");
+
+    for await (const chunk of stream.stream) {
+      const text = chunk.text();
+      if (text) res.write(text);
+    }
+
+    res.end();
   } catch (error) {
-    res.status(500).json({ error: "Failed to generate response" });
-  }
-});
-
-// Optionally keep your POST /ask route for JSON too
-app.post("/ask", async (req: Request, res: Response) => {
-  const { question } = req.body;
-
-  if (!question) {
-    return res.status(400).json({ error: "Question is required" });
-  }
-
-  try {
-    const answer = await AskGemini(question);
-    res.json({ question, answer });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to generate response" });
+    console.error("Error streaming response:", error);
+    res.status(500).send("Failed to generate response");
   }
 });
 
