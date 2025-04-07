@@ -21,7 +21,7 @@ async function AskGemini(prompt: string): Promise<string> {
 
 // /ask endpoint
 app.post('/ask', async (req: Request, res: Response) => {
-  const prompt = req.body.question;  // Get the question from the request body
+  const prompt = req.body.question;  // Accessing the question from the request body
   if (!prompt) {
     return res.status(400).json({ error: 'Question is required' });
   }
