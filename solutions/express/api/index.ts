@@ -39,13 +39,13 @@ app.post('/ask', async (req: Request, res: Response) => {
 });
 
 // Optional: Read file content
-fs.readFile('prompts/mytextfile.txt', 'utf-8', (err, data) => {
-  if (err) {
-    console.error("An error occurred:", err);
-    return;
-  }
-  console.log(data);
-});
+// fs.readFile('prompts/mytextfile.txt', 'utf-8', (err, data) => {
+//   if (err) {
+//     console.error("An error occurred:", err);
+//     return;
+//   }
+//   console.log(data);
+// });
 
 // Start the server
 const PORT = process.env.PORT || 3000;
