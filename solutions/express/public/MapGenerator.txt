@@ -1,88 +1,49 @@
-Generate a detailed 100x100 tile-based fantasy game map using the tile codes below. Each tile represents a game environment feature and should be used strategically to create a realistic, explorable world. The map should be playable and designed for player movement, exploration, and gameplay variety.
+You are generating a high-level layout for a fantasy game map using region-based definitions instead of full tile grids.
 
-Tile Codes (Environment Key):
+The total map size is 100x100 tiles.
 
-yaml
+Use a **region-based structure** to define areas of the map. Each region must include:
 
-00 : nothing (not on map / out-of-bounds)
-01 : ground (normal terrain)
-02 : rock (small boulders)
-03 : high rock / cliff (impassable boundary)
-04 : wall (castle/building wall)
-05 : wall boundary (castle/city limits)
-06 : water (lake, river)
-07 : snowy ground
-08 : snowy wall boundary (impassable)
-09 : snowy rock
-10 : door
-11 : tree
-12 : tall tree
-13 : bed
-14 : sand
-15 : desert rock
-16 : bridge
-17 : wooden floor
-18 : grass (lush, walkable)
-19 : flower patch
-20 : lava
-21 : lava rock
-22 : cave entrance
-23 : campfire
-24 : tent
-25 : farm field (crop)
-26 : fence
-27 : stone path
-28 : market stall
-29 : fountain
-30 : throne
-🧠 Map Logic Guidelines:
-Design functional zones: Include distinct areas like:
+- `name`: A descriptive name for the zone (e.g. "outer_forest", "village_market", "pier_docks")
+- `position`: Top-left `[x, y]` of the region
+- `size`: Width and height `[w, h]`
+- `type`: One of: `castle`, `village`, `market`, `forest`, `lake`, `river`, `snow`, `cliff`, `pier`, `plains`, etc.
+- `fill`: (optional) Base tile (`base`) and optional `features` with density (0.0–1.0)
+- `walls`: (optional) Tile symbol for solid wall around the region
+- `boundary`: (optional) Tile symbol for outer buffer area (e.g., castle courtyard)
+- `interior`: (optional) Anchored props like beds, doors, chests, paths
+- `anchors`: (optional) Player start, pier ends, etc.
 
-Forest biome (use 11, 12, 18, 19)
+Tile symbols (1-character codes):
+. = unused  
+g = ground  
+r = rock  
+R = high rock (boundary)  
+w = wall  
+b = wall boundary  
+~ = water  
+s = snow  
+S = snow cliff  
+o = snow rock  
+d = door  
+t = tree  
+T = tall tree  
+x = bed  
+m = market stall  
+f = fence  
+p = path  
+c = chest  
 
-Snow biome (use 07, 08, 09)
+The map must **make logical sense** as a game world. Follow these guidelines:
 
-Desert biome (use 14, 15, 20, 21)
+- A **castle** should be in a central or strategic area, possibly with a wall (`w`) and gate (`d`)
+- A **village** should surround or be near the castle, with homes, a **market**, and roads (`p`)
+- A **pier** should be on a lake or river near the village
+- **Forests** or **cliffs** should form the outer edges or transitions between biomes
+- Use **features** (trees, rocks, stalls, paths) with appropriate density (e.g., trees in forests, paths in villages)
+- Include some **manual placements** in interiors (e.g., beds in houses, market stalls, doors in walls)
+- Each area should be **non-square**, unless a structure like a castle
 
-Castle/City (use 04, 05, 10, 13, 17, 30)
+Output the map in this JSON-like structure only. Do not include explanations or full tilemaps.
 
-Plains (01, 18, 27)
-
-Lake or river system (06 with bridges 16)
-
-Village/town (use 17, 28, 29, 25, 26)
-
-Cave or dungeon entrances (22, surrounded by 02, 03)
-
-Biome transitions should be gradual, using border tiles or mix-ins (e.g., 18 into 07, or 14 into 01).
-
-Avoid square shapes in natural zones (e.g., forests, lakes) to simulate realism. Only man-made structures (e.g., castles, towns) should be rectangular or organized.
-
-The map should include paths (27) connecting areas like:
-
-Forest → Village → Castle
-
-Castle → Dungeon → Snow area
-
-Town → Desert → River
-
-Include gameplay-relevant structures:
-
-A central castle or fortress
-
-A small forest camp with tent (24) and campfire (23)
-
-At least one village or town square with stalls (28), fountain (29), and housing
-
-A farming area (25, 26)
-
-Optional secret cave with lava pool entrance (22, 20)
-
-Start the map output immediately.
-
-Only output the tile map in plain text, one row per line.
-
-Do not explain the map.
-
-Do not wrap it in code blocks or Markdown.
-
+Begin generating the map immediately.

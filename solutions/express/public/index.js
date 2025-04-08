@@ -1,3 +1,11 @@
+String.prototype.format = function() {
+  let formatted = this;
+  for (let i = 0; i < arguments.length; i++) {
+    const regexp = new RegExp('\\{' + i + '\\}', 'gi');
+    formatted = formatted.replace(regexp, arguments[i]);
+  }
+  return formatted;
+};
 window.loadAndAskStream = async function () {
   try {
     // First, load the contents of MapGenerator.txt
@@ -27,3 +35,39 @@ window.loadAndAskStream = async function () {
     console.error("Streaming failed:", err);
   }
 };
+
+window.Conversation = async function (person, input) {
+  try {
+    // First, load the contents of MapGenerator.txt
+    const personRes = await fetch("conversation.txt");
+    const rawText = await personRes.text();  // <- Await here
+    const personText = rawText.format(person["persona"], person["his"], input);
+    
+    // Then, use it as the question
+    const res = await fetch(`/ask?question=${encodeURIComponent(personText)}`);
+
+    if (!res.body) throw new Error("No response body");
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let finalText = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      finalText += chunk;
+
+      // Live update the DOM
+      document.getElementById("answer").innerText = finalText;
+    }
+    person.his = person.his + `{ User: ${input} \n You: ${finalText}} \n`
+  } catch (err) {
+    console.error("Streaming failed:", err);
+  }
+};
+window.Aarav = {
+  "persona": "Your name is Aarav. Your favorite animal is a chamelon (not a chameleon). You like to code, play brawl stars, tennis, and Goon. When confused, you often say 'racism'. you also like to say, 'Hawk Tuah'",
+  "his":""
+}
