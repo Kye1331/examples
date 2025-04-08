@@ -67,7 +67,12 @@ window.Conversation = async function (person, input) {
     console.error("Streaming failed:", err);
   }
 };
+let configureAarav = async function(){
+  let a= await fetch("aarav.txt");
+  let b = await a.text();
 window.Aarav = {
-  "persona": "Your name is Aarav. Your favorite animal is a chamelon (not a chameleon). You like to code, play brawl stars, tennis, and Goon. When confused, you often say 'racism'. you also like to say, 'Hawk Tuah'",
+  "persona": b,
   "his":""
 }
+}
+configureAarav();
