@@ -35,7 +35,15 @@ window.loadAndAskStream = async function () {
     console.error("Streaming failed:", err);
   }
 };
+window.ImgGeneration = async function (prompt){
 
+  const res = await fetch(`/gen?question=${encodeURIComponent(prompt)}`);
+ 
+}
+ window.LoadImage = function (){
+  document.getElementById('img').src="gemini-native-image.png"
+
+}
 window.Conversation = async function (person, input) {
   try {
     // First, load the contents of MapGenerator.txt
@@ -75,4 +83,5 @@ window.Aarav = {
   "his":""
 }
 }
+
 configureAarav();
