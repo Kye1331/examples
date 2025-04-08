@@ -15,7 +15,7 @@
 		"@google/generative-ai": "latest",
 		"dotenv": "^16.4.1",
 		"express": "^4.18.2",
-		"fs": "latest",
+		"fs": "latest"
 	
 	},
 	"devDependencies": {
