@@ -11,7 +11,11 @@ const app = express();
 app.use(express.json());
 
 // Serve static files from the public directory
-app.use(express.static(path.join(__dirname, "../public")));
+const publicDir = path.join(__dirname, "../public");
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+}
+app.use(express.static(publicDir));
 
 // Route to generate an image using Gemini
 app.get("/gen", async (req: Request, res: Response) => {
@@ -19,6 +23,9 @@ app.get("/gen", async (req: Request, res: Response) => {
 
   const contents = req.query.question as string;
 
+  if (!contents) {
+    return res.status(400).json({ error: "Query parameter 'question' is required" });
+  }
 
   try {
     const response = await ai.models.generateContent({
@@ -30,18 +37,32 @@ app.get("/gen", async (req: Request, res: Response) => {
     });
 
     if (response.candidates?.[0]?.content?.parts) {
+      let imageFilename = "";
+
       for (const part of response.candidates[0].content.parts) {
         if (part.text) {
-          console.log(part.text);
+          console.log("Text Response:", part.text);
         } else if (part.inlineData?.data) {
           const imageData = part.inlineData.data;
           const buffer = Buffer.from(imageData, "base64");
-          fs.writeFileSync("public/gemini-native-image.png", buffer);
-          console.log("Image saved as gemini-native-image.png");
+
+          // Use timestamp for a unique filename
+          imageFilename = `gemini-image-${Date.now()}.png`;
+          const imagePath = path.join(publicDir, imageFilename);
+          fs.writeFileSync(imagePath, buffer);
+
+          console.log(`Image saved as ${imageFilename}`);
         }
       }
 
-      res.status(200).json({ message: "Image generated and saved as gemini-native-image.png" });
+      if (imageFilename) {
+        res.status(200).json({
+          message: "Image generated successfully",
+          imageUrl: `/${imageFilename}`,
+        });
+      } else {
+        res.status(500).json({ error: "Image data was not found in the response." });
+      }
     } else {
       res.status(500).json({ error: "No content returned from AI" });
     }
@@ -76,6 +97,21 @@ app.get("/ask", async (req: Request, res: Response) => {
     console.error("Error streaming response:", error);
     res.status(500).send("Failed to generate response");
   }
+});
+
+// Optional: Simple form for testing in browser
+app.get("/", (req: Request, res: Response) => {
+  res.send(`
+    <form action="/gen" method="get">
+      <input type="text" name="question" placeholder="Describe your image" style="width:300px" />
+      <button type="submit">Generate Image</button>
+    </form>
+    <br/>
+    <form action="/ask" method="get">
+      <input type="text" name="question" placeholder="Ask something" style="width:300px" />
+      <button type="submit">Ask AI</button>
+    </form>
+  `);
 });
 
 // Start the server
