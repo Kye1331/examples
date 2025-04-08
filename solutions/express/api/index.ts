@@ -23,7 +23,7 @@ app.get("/ask", async (req: Request, res: Response) => {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" }); // Or gemini-pro if supported
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Or gemini-pro if supported
     const stream = await model.generateContentStream(question);
 
     res.setHeader("Content-Type", "text/plain");
