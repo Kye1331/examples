@@ -36,13 +36,23 @@ window.loadAndAskStream = async function () {
   }
 };
 window.ImgGeneration = async function (prompt) {
-  await fetch(`/gen?question=${encodeURIComponent(prompt)}`);
-  LoadImage(); // Automatically load the new image after generation
+  try {
+    const res = await fetch(`/gen?question=${encodeURIComponent(prompt)}`);
+    const json = await res.json();
+    if (json.image) {
+      document.getElementById("img").src = json.image;
+    } else {
+      console.error("No image returned");
+    }
+  } catch (err) {
+    console.error("Image generation failed:", err);
+  }
 };
 
-window.LoadImage = function () {
+
+window.LoadImage = function (src) {
   const img = document.getElementById('img');
-  img.src = `gemini-native-image.png?t=${Date.now()}`; // Prevent caching
+  img.src = src
 };
 
 window.Conversation = async function (person, input) {

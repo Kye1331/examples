@@ -38,25 +38,21 @@ app.get("/gen", async (req: Request, res: Response) => {
 
     if (response.candidates?.[0]?.content?.parts) {
       for (const part of response.candidates[0].content.parts) {
-        if (part.text) {
-          console.log(part.text);
-        } else if (part.inlineData?.data) {
-          const imageData = part.inlineData.data;
-          const buffer = Buffer.from(imageData, "base64");
-          fs.writeFileSync(path.join(publicDir, "gemini-native-image.png"), buffer);
-          console.log("Image saved");
+        if (part.inlineData?.data) {
+          const base64 = part.inlineData.data;
+          const dataUrl = `data:image/png;base64,${base64}`;
+          return res.status(200).json({ image: dataUrl });
         }
       }
-
-      res.status(200).json({ message: "Image generated" });
-    } else {
-      res.status(500).json({ error: "No content returned from AI" });
     }
+
+    res.status(500).json({ error: "No image returned from Gemini" });
   } catch (error) {
     console.error("Error generating image:", error);
     res.status(500).json({ error: "Failed to generate image" });
   }
 });
+
 
 app.get("/ask", async (req: Request, res: Response) => {
   const genAI = new GoogleGenerativeAI(process.env.GENAI_API_KEY || "");
