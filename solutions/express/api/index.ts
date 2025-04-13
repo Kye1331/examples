@@ -10,15 +10,22 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// Serve static files from the public directory
-app.use(express.static(path.join(__dirname, "../public")));
+const publicDir = path.join(__dirname, "../public");
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+}
 
-// Route to generate an image using Gemini
+app.use(express.static(publicDir, {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith("gemini-native-image.png")) {
+      res.setHeader("Cache-Control", "no-store");
+    }
+  },
+}));
+
 app.get("/gen", async (req: Request, res: Response) => {
   const ai = new GoogleGenAI({ apiKey: process.env.GENAI_API_KEY || "" });
-
   const contents = req.query.question as string;
-
 
   try {
     const response = await ai.models.generateContent({
@@ -36,12 +43,12 @@ app.get("/gen", async (req: Request, res: Response) => {
         } else if (part.inlineData?.data) {
           const imageData = part.inlineData.data;
           const buffer = Buffer.from(imageData, "base64");
-          fs.writeFileSync("public/gemini-native-image.png", buffer);
-          console.log("Image saved as gemini-native-image.png");
+          fs.writeFileSync(path.join(publicDir, "gemini-native-image.png"), buffer);
+          console.log("Image saved");
         }
       }
 
-      res.status(200).json({ message: "Image generated and saved as gemini-native-image.png" });
+      res.status(200).json({ message: "Image generated" });
     } else {
       res.status(500).json({ error: "No content returned from AI" });
     }
@@ -51,7 +58,6 @@ app.get("/gen", async (req: Request, res: Response) => {
   }
 });
 
-// Route to stream a Gemini text response based on query
 app.get("/ask", async (req: Request, res: Response) => {
   const genAI = new GoogleGenerativeAI(process.env.GENAI_API_KEY || "");
   const question = req.query.question as string;
@@ -78,12 +84,9 @@ app.get("/ask", async (req: Request, res: Response) => {
   }
 });
 
-// Start the server
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-  });
-}
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
 
 export default app;

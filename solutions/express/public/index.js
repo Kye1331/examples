@@ -36,28 +36,15 @@ window.loadAndAskStream = async function () {
   }
 };
 window.ImgGeneration = async function (prompt) {
-  event?.preventDefault(); // <-- prevent page from navigating away
-  const res = await fetch(`/gen?question=${encodeURIComponent(prompt)}`);
-  const data = await res.json();
-
-  if (data.imageBase64) {
-    document.getElementById("img").src = data.imageBase64;
-  } else {
-    document.getElementById("img").alt = "Image generation failed.";
-  }
+  await fetch(`/gen?question=${encodeURIComponent(prompt)}`);
+  LoadImage(); // Automatically load the new image after generation
 };
- window.LoadImage = function (){
- document.getElementById('img').src = "gemini-native-image.png";
 
+window.LoadImage = function () {
+  const img = document.getElementById('img');
+  img.src = `gemini-native-image.png?t=${Date.now()}`; // Prevent caching
+};
 
-}
-document.getElementById("generateBtn").addEventListener("click", async function (e) {
-  e.preventDefault();
-  const promptText = prompt("Add a prompt");
-  if (promptText) {
-    await ImgGeneration(promptText);
-  }
-});
 window.Conversation = async function (person, input) {
   try {
     // First, load the contents of MapGenerator.txt

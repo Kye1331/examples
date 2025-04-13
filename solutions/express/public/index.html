@@ -1,31 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Ask Aarav!</title>
-</head>
+<html>
 <body>
-  <p><strong>Ask Aarav!</strong></p>
+<p>Ask Aarav!</p>
+<script src="index.js" type="module"></script>
+<button onclick="Conversation(Aarav,prompt('Hi'))">Ask Him!!</button>
+<p>question:</p>
+<p id="text"></p>
+<p>answer </p>
+<p id="answer"></p>
 
-  <button onclick="Conversation(Aarav, prompt('Hi'))">Ask Him!!</button>
 
-  <p>Question:</p>
-  <p id="text"></p>
-
-  <p>Answer:</p>
-  <p id="answer"></p>
-
-  <hr>
-
-  <button id="generateBtn">Generate an image</button>
-  
-  <!-- ❌ You had a missing closing tag for <button> -->
-  <button onclick="LoadImage()">Load Image</button>
-  
-  <br><br>
-  <img id="img" style="max-width: 400px; border: 1px solid #ccc; padding: 10px;" />
-
-  <!-- Your JS -->
-  <script src="index.js" type="module"></script>
+<button onclick="ImgGeneration(prompt('add a prompt'))">Generate an image</button>
+<button onclick="LoadImage()"> Load Image<button>
+    <img id="img">
 </body>
 </html>
