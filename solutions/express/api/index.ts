@@ -8,7 +8,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// Route to generate an image using Gemini
+// Route to generate an image using Geminil
 
 // Route to stream a Gemini text response based on query
 app.get("/ask", async (req: Request, res: Response) => {
