@@ -12,7 +12,7 @@ app.use(express.json());
 
 // Route to stream a Gemini text response based on query
 app.get("/ask", async (req: Request, res: Response) => {
-  const ai = new GoogleGenerativeAI(process.env.GENAI_API_KEY || "");
+  const ai = new GoogleGenAI({apiKey:process.env.GENAI_API_KEY || ""});
   const question = req.query.question as string;
 
   if (!question) {
