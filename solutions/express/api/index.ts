@@ -29,7 +29,7 @@ app.get("/ask", async (req: Request, res: Response) => {
     res.setHeader("Content-Type", "text/plain");
 
 
-     res.write(response);
+     res.write(response.text);
 
     res.end();
   } 
